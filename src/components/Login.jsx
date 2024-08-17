@@ -1,12 +1,16 @@
 import React, { useRef, useState } from 'react'
 import { validation } from '../utils/validate'
-import { createUserWithEmailAndPassword,   signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword,   signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from '../utils/Firebase';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addUser } from '../utils/userSlice';
 
 
 const Login = () => {
   const [isSignIn, setIsSignIn] = useState(true)
   const [errMessage, setErrMessage] = useState(null)
+  const dispatch = useDispatch();
   const handleToggle = () => {
     setIsSignIn(!isSignIn)
   }
@@ -14,18 +18,42 @@ const Login = () => {
   const email = useRef(null);
   const password = useRef(null);
 
+    const navigate = useNavigate();
+
   const handleSignUp = () => {
     //validate
     const message = validation( email.current.value, password.current.value);
     setErrMessage(message)
 
     if (message) return;
+
     if (!isSignIn) {
+
       createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
-  .then((userCredential) => {
-    // Signed up 
-    const user = userCredential.user;
-    // ...
+        
+     .then((userCredential) => {
+    
+       const user = userCredential.user;
+       console.log(user);
+       
+
+    updateProfile(user, {
+
+      displayName: name.current.value 
+     
+      
+      
+    }).then(() => {
+       const { uid, email, displayName } = auth.currentUser;
+      dispatch(addUser({ uid: uid, email: email, displayName: displayName }));
+   
+      navigate("/home");
+      
+    }).catch((error) => {
+    
+    setErrMessage(error.message)
+}); 
+   
   })
   .catch((error) => {
     const errorCode = error.code;
@@ -44,7 +72,9 @@ const Login = () => {
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
-          // ...
+          console.log(user);
+          
+          navigate("/home")
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -56,7 +86,7 @@ const Login = () => {
 
   }
   return (
-    <div className=''>
+    <div>
       <form onSubmit={(e) => e.preventDefault()} className='flex flex-col gap-4 w-[24rem] shadow-xl px-5 py-10 mx-auto my-20 border border-gray-300' action="">
         <h1 className='mx-11 text-xl font-semibold mb-3'>{isSignIn ? "Sign In" : "Sign Up"}</h1>
 

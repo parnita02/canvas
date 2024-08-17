@@ -2,7 +2,8 @@ import React from 'react'
 
 const Footer = () => {
   return (
-    <div className='absolute flex'>
+    <div>
+      <p className='text-center p-3'>Copyright @parnitaDwivedi</p>
      
     </div>
   )
